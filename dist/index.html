@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#f5f5ef">
+  <meta name="description" content="Strength training log for exercises, sets, weight and reps.">
+  <title>Set — Workout log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://telegram.org/js/telegram-web-app.js?65" defer></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#today" aria-label="Set — Today">
+        <span class="brand-mark" aria-hidden="true"><i class="icon icon-barbell"></i></span>
+        <span><span translate="no">set<span class="brand-dot">.</span></span><small>Workout log</small></span>
+      </a>
+      <nav class="nav" aria-label="Workout log sections">
+        <a href="#today" aria-current="page"><i class="icon icon-today" aria-hidden="true"></i><span>Today</span></a>
+        <a href="#exercises"><i class="icon icon-barbell" aria-hidden="true"></i><span>Exercises</span></a>
+        <a href="#history"><i class="icon icon-history" aria-hidden="true"></i><span>History</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell" id="main-content" tabindex="-1">
+    <section id="page-today" aria-labelledby="today-title">
+      <div class="hero">
+        <div class="hero-content">
+          <p class="hero-date" id="today-date"></p>
+          <h1 id="today-title" tabindex="-1">My workouts</h1>
+          <p class="hero-description">Record your sets, weight and reps.</p>
+          <button class="button button-primary" type="button" data-action="log"><i class="icon icon-plus" aria-hidden="true"></i><span>Log sets</span></button>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-art-grid"></div>
+          <div class="barbell"><i></i><i></i><i></i><b></b><i></i><i></i><i></i></div>
+        </div>
+      </div>
+
+      <dl class="stats" aria-label="Today's totals">
+        <div><dt>Exercises</dt><dd id="stat-exercises">0</dd><i class="icon icon-barbell" aria-hidden="true"></i></div>
+        <div><dt>Sets</dt><dd id="stat-sets">0</dd><i class="icon icon-stack" aria-hidden="true"></i></div>
+        <div><dt>Reps</dt><dd id="stat-reps">0</dd><i class="icon icon-repeat" aria-hidden="true"></i></div>
+      </dl>
+
+      <div class="home-grid">
+        <section class="panel" aria-labelledby="today-log-title">
+          <div class="panel-heading">
+            <h2 id="today-log-title">Today's log</h2>
+            <a class="text-button" href="#history">View history</a>
+          </div>
+          <div id="today-log"></div>
+        </section>
+        <section class="panel" aria-labelledby="today-library-title">
+          <div class="panel-heading">
+            <h2 id="today-library-title">My exercises</h2>
+            <button type="button" class="icon-button" data-action="exercise" aria-label="Add exercise" title="Add exercise"><i class="icon icon-plus" aria-hidden="true"></i></button>
+          </div>
+          <div id="today-library"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="page-exercises" aria-labelledby="exercises-title" hidden>
+      <header class="page-heading">
+        <div><h1 id="exercises-title" tabindex="-1">My exercises</h1><p>Save exercises for future workouts.</p></div>
+        <button class="button button-primary" type="button" data-action="exercise"><i class="icon icon-plus" aria-hidden="true"></i><span>Add exercise</span></button>
+      </header>
+      <section class="panel library-panel" id="exercise-list" aria-label="Saved exercises"></section>
+    </section>
+
+    <section id="page-history" aria-labelledby="history-title" hidden>
+      <header class="page-heading">
+        <div><h1 id="history-title" tabindex="-1">Workout history</h1><p>Weight and reps by date.</p></div>
+        <button class="button button-primary" type="button" data-action="log"><i class="icon icon-plus" aria-hidden="true"></i><span>Log sets</span></button>
+      </header>
+      <div class="filter-bar">
+        <span id="history-filter-label">Exercise</span>
+        <div class="select-wrap"><select id="history-filter" name="exercise" autocomplete="off" hidden></select><button type="button" class="select-trigger" data-select="history-filter" aria-haspopup="dialog" aria-labelledby="history-filter-label history-filter-value"><span id="history-filter-value"></span></button></div>
+      </div>
+      <div id="history-list"></div>
+    </section>
+  </main>
+
+  <dialog id="exercise-dialog" aria-labelledby="exercise-dialog-title">
+    <form id="exercise-form" class="dialog-body" autocomplete="off" novalidate>
+      <header class="dialog-heading">
+        <h2 id="exercise-dialog-title">New exercise</h2>
+        <button class="icon-button" type="button" data-action="close" aria-label="Close"><i class="icon icon-close" aria-hidden="true"></i></button>
+      </header>
+      <div class="field">
+        <label for="exercise-name">Name</label>
+        <input id="exercise-name" name="name" type="text" maxlength="80" placeholder="e.g. Bench press…" required>
+      </div>
+      <p class="form-error" role="status"></p>
+      <button class="button button-primary dialog-submit" type="submit">Save exercise</button>
+    </form>
+  </dialog>
+
+  <dialog id="log-dialog" aria-labelledby="log-dialog-title">
+    <form id="log-form" class="dialog-body" autocomplete="off" novalidate>
+      <header class="dialog-heading">
+        <h2 id="log-dialog-title">Log sets</h2>
+        <button class="icon-button" type="button" data-action="close" aria-label="Close"><i class="icon icon-close" aria-hidden="true"></i></button>
+      </header>
+      <div class="log-fields">
+        <div class="field">
+          <div class="exercise-picker-heading">
+            <span id="log-exercise-label">Exercise</span>
+            <button class="text-button" type="button" data-action="add-log-exercise" aria-haspopup="dialog">
+              <i class="icon icon-plus" aria-hidden="true"></i><span>Add exercise</span>
+            </button>
+          </div>
+          <span class="select-wrap"><select name="exercise" id="log-exercise" required hidden></select><button type="button" class="select-trigger" data-select="log-exercise" aria-haspopup="dialog" aria-labelledby="log-exercise-label log-exercise-value"><span id="log-exercise-value"></span></button></span>
+        </div>
+        <div class="field" id="log-date-field" hidden><label for="log-date">Date</label><input type="date" id="log-date" name="date" required disabled></div>
+      </div>
+      <div class="set-labels" aria-hidden="true"><span>#</span><span>Weight, kg</span><span>Reps</span><span></span></div>
+      <div id="set-fields"></div>
+      <p class="weight-hint" id="weight-hint">Enter 0 kg for a set with no added weight.</p>
+      <button class="button button-secondary add-set" type="button" data-action="add-set"><i class="icon icon-plus" aria-hidden="true"></i><span>Add another set</span></button>
+      <p class="form-error" role="status"></p>
+      <div class="dialog-actions">
+        <button class="button button-danger" type="button" data-action="delete-set" hidden>Delete set</button>
+        <button class="button button-primary dialog-submit" type="submit">Save sets</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="delete-dialog" aria-labelledby="delete-title">
+    <div class="dialog-body">
+      <h2 id="delete-title">Delete this set?</h2>
+      <p class="confirmation-copy" id="delete-summary"></p>
+      <p class="form-error" role="status"></p>
+      <div class="dialog-actions">
+        <button class="button button-secondary" type="button" data-action="cancel-delete">Cancel</button>
+        <button class="button button-danger-solid" type="button" data-action="confirm-delete">Delete set</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="picker-dialog" aria-labelledby="picker-title">
+    <div class="dialog-body">
+      <header class="dialog-heading">
+        <h2 id="picker-title">Choose exercise</h2>
+        <button class="icon-button" type="button" data-picker-close aria-label="Close"><i class="icon icon-close" aria-hidden="true"></i></button>
+      </header>
+      <div class="picker-list"></div>
+    </div>
+  </dialog>
+
+  <dialog id="discard-dialog" aria-labelledby="discard-title" aria-describedby="discard-description">
+    <div class="dialog-body">
+      <h2 id="discard-title">Discard changes?</h2>
+      <p class="confirmation-copy" id="discard-description">Your unsaved changes will be lost.</p>
+      <div class="dialog-actions">
+        <button class="button button-secondary" type="button" data-action="keep-editing">Keep editing</button>
+        <button class="button button-danger-solid" type="button" data-action="discard">Discard changes</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+  <template id="set-template">
+    <div class="set-row">
+      <span class="set-index" aria-hidden="true"></span>
+      <input type="text" name="weight" inputmode="decimal" maxlength="9" placeholder="0" aria-describedby="weight-hint" required>
+      <input type="number" name="reps" inputmode="numeric" min="1" max="99999" step="1" placeholder="10" required>
+      <button class="icon-button remove-row" type="button" data-action="remove-row"><i class="icon icon-close" aria-hidden="true"></i></button>
+    </div>
+  </template>
+</body>
+</html>
