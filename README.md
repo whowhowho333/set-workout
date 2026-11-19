@@ -1,25 +1,35 @@
-# Set
+<div align="center">
+  <img src="icon.png" alt="Set logo" width="104" height="104">
 
-Set is a workout journal for Telegram Mini Apps. Save exercises, record sets with weight and reps, and review your training history.
+  <h1>Set</h1>
+  <p><strong>A simple workout journal, ready for Telegram.</strong></p>
+  <p>Save your exercises. Log your sets. Follow your progress.</p>
+</div>
 
-## Features
+---
 
-- Create and rename exercises.
-- Log multiple sets for an exercise and edit or delete saved sets.
-- View today's totals and filter your history by exercise.
-- Add an exercise while logging sets.
+## Your training, in one place
+
+Set keeps the essentials close at hand during a workout.
+
+- **Build your exercise library** — add and rename exercises, including while logging a set.
+- **Record your work** — save multiple sets with weight and reps in one go.
+- **See today's totals** — check your exercises, sets and reps at a glance.
+- **Review your history** — filter by exercise, then edit or delete individual sets.
+
+New sets use the current date on your device. You can change the date when editing a saved set.
 
 ## Run locally
 
-Install Node.js, then run the following command in the project directory:
+You need Node.js installed. From the project folder, start the local server:
 
 ```sh
 node server.js
 ```
 
-Open http://127.0.0.1:4173 in a browser. The project has no dependencies to install or build step.
+Open [localhost:4173](http://127.0.0.1:4173). No dependency installation or build step is required.
 
-Run the journal tests with:
+To run the journal tests:
 
 ```sh
 node --test
@@ -27,26 +37,28 @@ node --test
 
 ## Project structure
 
-| Path | Purpose |
-| --- | --- |
-| `dist/index.html` and `dist/styles.css` | Page markup and styles |
-| `dist/app.js` | Application startup and navigation |
-| `dist/js/journal/` | Journal operations, local storage and dates |
-| `dist/js/ui/` | Screens, dialogs and shared UI components |
-| `dist/js/platform/` | Telegram Mini App integration |
-| `server.js` | Local preview server |
-| `package.json` | Node.js module configuration |
-| `tests/` | Journal tests |
-| `icon.png` | Profile image for the Telegram bot |
+```text
+dist/
+├── index.html          Page markup
+├── styles.css          App styles
+├── app.js              Startup and navigation
+└── js/
+    ├── journal/        Journal operations, storage and dates
+    ├── platform/       Telegram integration
+    └── ui/             Screens, forms and UI components
+tests/                  Journal tests
+server.js               Local preview server
+icon.png                Bot profile image
+```
 
-The `dist` directory contains the application's source files and is the directory to publish.
+The app's source files are in `dist/`, which is also the directory to publish.
 
 ## Deploy
 
-Upload the contents of `dist` to a static HTTPS host. For Cloudflare Pages Git integration, use `dist` as the build output directory and leave the build command empty.
+Host the contents of `dist/` on a static HTTPS host. For Cloudflare Pages with Git integration, select `dist` as the build output directory and leave the build command empty.
 
-In [@BotFather](https://t.me/BotFather), use `/setmenubutton` to point your bot's menu button to the deployed HTTPS address. See the [Telegram Mini Apps documentation](https://core.telegram.org/bots/webapps#launching-mini-apps-from-the-menu-button) for details.
+In [@BotFather](https://t.me/BotFather), use `/setmenubutton` to link your bot's menu button to the deployed HTTPS address. See the [Telegram Mini Apps documentation](https://core.telegram.org/bots/webapps#launching-mini-apps-from-the-menu-button) for launch options.
 
 ## Data storage
 
-Workouts are stored in the device's `localStorage`. The browser and Telegram use separate journals, and data is not synced across devices. The app does not require a bot token.
+Set stores workouts in `localStorage` on the device. Browser and Telegram sessions use separate journals, and data does not sync across devices. The app does not require a bot token.
