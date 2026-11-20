@@ -4,8 +4,12 @@ import { readFile } from 'node:fs/promises';
 const files = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/index.html', ['index.html', 'text/html; charset=utf-8']],
+  ['/today', ['index.html', 'text/html; charset=utf-8']],
+  ['/exercises', ['index.html', 'text/html; charset=utf-8']],
+  ['/history', ['index.html', 'text/html; charset=utf-8']],
   ['/styles.css', ['styles.css', 'text/css; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
+  ['/assets/icon.png', ['assets/icon.png', 'image/png']],
 ]);
 
 const host = '127.0.0.1';

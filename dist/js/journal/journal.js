@@ -1,3 +1,5 @@
+import { workoutActions, workoutEntries } from './workouts.js';
+
 export function createJournal(storage) {
   let state = { exercises: [], sets: [] };
 
@@ -14,6 +16,7 @@ export function createJournal(storage) {
   }
 
   return {
+    ...workoutActions(commit),
     get state() { return state; },
     reload() {
       state = storage.read();
@@ -35,11 +38,24 @@ export function createJournal(storage) {
       return commit((next) => {
         if (sets.some((set) => !next.exercises.some((item) => item.id === set.exerciseId))) return 'chooseExercise';
         if (!editId) {
+          for (const set of sets) {
+            if (!set.workoutId) continue;
+            const workout = next.activeWorkout;
+            if (workout?.id !== set.workoutId) return 'workoutMissing';
+            if (!workoutEntries(workout).some(({ id, exerciseId }) => id === set.workoutEntryId && exerciseId === set.exerciseId)) {
+              return 'workoutEntryMissing';
+            }
+          }
           next.sets.push(...sets);
           return;
         }
         const index = next.sets.findIndex((set) => set.id === editId);
         if (index < 0) return 'setMissing';
+        if (next.sets[index].workoutId) {
+          const { workoutId, workoutEntryId, exerciseId } = next.sets[index];
+          next.sets[index] = { ...sets[0], workoutId, workoutEntryId, exerciseId };
+          return;
+        }
         next.sets[index] = sets[0];
       });
     },

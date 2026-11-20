@@ -1,6 +1,7 @@
 import { byId, exerciseOptions, showError, toast } from './components.js';
 import { describeSet } from './format.js';
 import { today } from '../journal/dates.js';
+import { workoutEntries } from '../journal/workouts.js';
 import { setClosingConfirmation } from '../platform/telegram.js';
 
 const formErrors = {
@@ -8,6 +9,8 @@ const formErrors = {
   duplicateExercise: 'An exercise with this name already exists.',
   chooseExercise: 'Choose a saved exercise.',
   setMissing: 'This set has already been deleted.',
+  workoutMissing: 'This workout is no longer in progress.',
+  workoutEntryMissing: 'This exercise is no longer in the workout.',
   storageError: 'Could not save your data. Check whether storage is available on this device.',
 };
 
@@ -24,6 +27,8 @@ export function initializeDialogs(journal, render, updateBackButton) {
   let exerciseIdToEdit = null;
   let setIdToEdit = null;
   let logAfterCreating = false;
+  let afterCreating;
+  let workoutTarget;
   const initialValues = new WeakMap();
   let unsaved = false;
 
@@ -59,10 +64,11 @@ export function initializeDialogs(journal, render, updateBackButton) {
     dialog.close();
   }
 
-  function openExercise({ id = null, thenLog = false } = {}) {
+  function openExercise({ id = null, thenLog = false, onCreated } = {}) {
     const exercise = journal.state.exercises.find((item) => item.id === id);
     exerciseIdToEdit = exercise?.id ?? null;
     logAfterCreating = thenLog;
+    afterCreating = onCreated;
     exerciseForm.reset();
     showError(exerciseForm);
     byId('exercise-dialog-title').textContent = exercise ? 'Rename exercise' : 'New exercise';
@@ -101,20 +107,28 @@ export function initializeDialogs(journal, render, updateBackButton) {
     }
   }
 
-  function openLog({ exerciseId, set } = {}) {
+  function openLog({ exerciseId, set, workoutEntryId } = {}) {
+    const workout = journal.state.activeWorkout;
+    if (workoutEntryId) {
+      const entry = workoutEntries(workout).find(({ id }) => id === workoutEntryId);
+      if (!entry) return;
+      exerciseId = entry.exerciseId;
+    }
     if (!journal.state.exercises.length) {
       openExercise({ thenLog: true });
       return;
     }
     setIdToEdit = set?.id ?? null;
+    workoutTarget = workoutEntryId ? { workoutId: workout.id, workoutEntryId } : null;
     logForm.reset();
     showError(logForm);
     byId('log-dialog-title').textContent = set ? 'Edit set' : 'Log sets';
     exerciseOptions(journal.state.exercises, logForm.elements.exercise, false, set?.exerciseId ?? exerciseId);
+    logForm.elements.exercise.disabled = Boolean(workoutTarget || set?.workoutId);
     dateField.hidden = !set;
     logForm.elements.date.disabled = !set;
     logForm.elements.date.value = set?.date ?? '';
-    logForm.querySelector('[data-action="add-log-exercise"]').hidden = Boolean(set);
+    logForm.querySelector('[data-action="add-log-exercise"]').hidden = Boolean(set || workoutTarget);
     logForm.querySelector('[data-action="add-set"]').hidden = Boolean(set);
     logForm.querySelector('[data-action="delete-set"]').hidden = !set;
     logForm.querySelector('[type="submit"]').textContent = set ? 'Save changes' : 'Save sets';
@@ -124,7 +138,7 @@ export function initializeDialogs(journal, render, updateBackButton) {
     logDialog.showModal();
     if (finePointer.matches) {
       if (set || exerciseId) setFields.querySelector('input').focus();
-      else logForm.querySelector('[data-select="log-exercise"]').focus();
+      else logForm.elements.exercise.focus();
     }
     updateBackButton();
   }
@@ -143,11 +157,13 @@ export function initializeDialogs(journal, render, updateBackButton) {
 
     exerciseDialog.close();
     render();
-    if (logDialog.open) {
+    if (afterCreating) {
+      afterCreating(id);
+    } else if (logDialog.open) {
       const select = logForm.elements.exercise;
       exerciseOptions(journal.state.exercises, select, false, id);
       if (select.getAttribute('aria-invalid') === 'true') showError(logForm);
-      logForm.querySelector('[data-select="log-exercise"]').focus();
+      logForm.elements.exercise.focus();
       updateUnsaved();
     } else if (logAfterCreating) {
       openLog({ exerciseId: id });
@@ -180,7 +196,7 @@ export function initializeDialogs(journal, render, updateBackButton) {
         return;
       }
       const reps = repsInput.valueAsNumber;
-      sets.push({ id: setIdToEdit ?? crypto.randomUUID(), exerciseId: exercise.value, date: workoutDate, weight, reps });
+      sets.push({ id: setIdToEdit ?? crypto.randomUUID(), exerciseId: exercise.value, date: workoutDate, weight, reps, ...workoutTarget });
     }
 
     const editId = setIdToEdit;
@@ -205,6 +221,7 @@ export function initializeDialogs(journal, render, updateBackButton) {
       case 'add-log-exercise': openExercise(); break;
       case 'rename': openExercise({ id }); break;
       case 'log': openLog({ exerciseId: id }); break;
+      case 'workout-log': openLog({ workoutEntryId: id }); break;
       case 'edit-set': {
         const set = journal.state.sets.find((item) => item.id === id);
         if (set) openLog({ set });
@@ -277,15 +294,12 @@ export function initializeDialogs(journal, render, updateBackButton) {
     }
   }
 
-  return () => {
-    const picker = byId('picker-dialog');
-    if (picker.open) {
-      picker.close();
-      return true;
-    }
+  function closeTopDialog() {
     const top = discardDialog.open ? discardDialog : deleteDialog.open ? deleteDialog : editingDialog();
     if (!top) return false;
     requestClose(top);
     return true;
-  };
+  }
+
+  return { closeTopDialog, openExercise };
 }

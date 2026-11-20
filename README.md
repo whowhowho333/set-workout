@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="icon.png" alt="Set logo" width="104" height="104">
+  <img src="dist/assets/icon.png" alt="Set logo" width="104" height="104">
 
   <h1>Set</h1>
   <p><strong>A simple workout journal, ready for Telegram.</strong></p>
@@ -42,22 +42,14 @@ dist/
 ├── index.html          Page markup
 ├── styles.css          App styles
 ├── app.js              Startup and navigation
+├── assets/             Set logo and Telegram avatar
 └── js/
     ├── journal/        Journal operations, storage and dates
     ├── platform/       Telegram integration
     └── ui/             Screens, forms and UI components
 tests/                  Journal tests
 server.js               Local preview server
-icon.png                Bot profile image
 ```
-
-The app's source files are in `dist/`, which is also the directory to publish.
-
-## Deploy
-
-Host the contents of `dist/` on a static HTTPS host. For Cloudflare Pages with Git integration, select `dist` as the build output directory and leave the build command empty.
-
-In [@BotFather](https://t.me/BotFather), use `/setmenubutton` to link your bot's menu button to the deployed HTTPS address. See the [Telegram Mini Apps documentation](https://core.telegram.org/bots/webapps#launching-mini-apps-from-the-menu-button) for launch options.
 
 ## Data storage
 

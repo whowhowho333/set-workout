@@ -1,9 +1,10 @@
 import { createJournal } from './js/journal/journal.js';
 import { localJournalStorage } from './js/journal/storage.js';
 import { journalOwner, insideTelegram, initializeTelegram, setBackButtonVisible } from './js/platform/telegram.js';
-import { byId, toast, initializeExercisePicker } from './js/ui/components.js';
+import { byId, toast } from './js/ui/components.js';
 import { initializeDialogs } from './js/ui/dialogs.js';
 import { renderPage } from './js/ui/screens.js';
+import { initializeWorkout } from './js/ui/workouts.js';
 
 const storageKey = `set.training.v1.${journalOwner}`;
 const journal = createJournal(localJournalStorage(storageKey));
@@ -35,7 +36,7 @@ function showPage(requested) {
   page = next;
   for (const candidate of pages) byId(`page-${candidate}`).hidden = candidate !== page;
   for (const link of document.querySelectorAll('.nav a')) {
-    if (link.hash === `#${page}`) link.setAttribute('aria-current', 'page');
+    if (link.pathname === `/${page}`) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   }
   render();
@@ -55,8 +56,8 @@ function reloadJournal() {
 }
 
 reloadJournal();
-initializeExercisePicker();
-const closeTopDialog = initializeDialogs(journal, render, updateBackButton);
+const { closeTopDialog, openExercise } = initializeDialogs(journal, render, updateBackButton);
+const closeWorkoutDialog = initializeWorkout(journal, render, updateBackButton, openExercise);
 document.querySelector('.skip-link').addEventListener('click', (event) => {
   event.preventDefault();
   main.focus();
@@ -79,20 +80,33 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden) render();
 });
 
-if (insideTelegram) {
-  document.addEventListener('click', (event) => {
-    const link = event.target.closest('a[href^="#"]');
-    if (link && pages.includes(link.hash.slice(1)) && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
-      event.preventDefault();
-      showPage(link.hash.slice(1));
-    }
-  });
-  initializeTelegram(() => {
-    if (!closeTopDialog()) showPage('today');
-  });
-  showPage('today');
-} else {
-  const fromHash = () => showPage(location.hash.slice(1));
-  window.addEventListener('hashchange', fromHash);
-  fromHash();
+function navigate(next) {
+  if (page === next) return;
+  history.pushState(null, '', `/${next}${location.search}${location.hash}`);
+  showPage(next);
 }
+
+document.addEventListener('click', (event) => {
+  const link = event.target.closest('a');
+  if (!link || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || link.target || link.hasAttribute('download') || link.origin !== location.origin) return;
+  const next = link.pathname.slice(1);
+  if (!pages.includes(next)) return;
+  event.preventDefault();
+  navigate(next);
+});
+
+window.addEventListener('popstate', () => showPage(location.pathname.slice(1)));
+
+const legacyPage = location.hash.slice(1);
+if (pages.includes(legacyPage)) {
+  history.replaceState(history.state, '', `/${legacyPage}${location.search}`);
+} else if (location.pathname === '/' || location.pathname === '/index.html') {
+  history.replaceState(history.state, '', `/today${location.search}${location.hash}`);
+}
+
+if (insideTelegram) {
+  initializeTelegram(() => {
+    if (!closeTopDialog() && !closeWorkoutDialog()) navigate('today');
+  });
+}
+showPage(location.pathname.slice(1));

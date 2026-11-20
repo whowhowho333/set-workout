@@ -23,8 +23,8 @@ export function initializeTelegram(onBack) {
   telegram.ready();
   telegram.expand();
   if (telegram.isVersionAtLeast('6.9')) {
-    telegram.setHeaderColor('#f5f5ef');
-    telegram.setBackgroundColor('#f5f5ef');
+    telegram.setHeaderColor('#f4f3f0');
+    telegram.setBackgroundColor('#f4f3f0');
   }
   telegram.BackButton?.onClick(onBack);
 }

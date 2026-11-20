@@ -41,48 +41,6 @@ export function exerciseOptions(exercises, select, includeAll = false, selected 
   if (includeAll) options.unshift(new Option('All exercises', ''));
   select.replaceChildren(...options);
   if (options.some((option) => option.value === selected)) select.value = selected;
-  updateExercisePicker(select);
-}
-
-export function updateExercisePicker(select) {
-  const trigger = document.querySelector(`[data-select="${select.id}"]`);
-  trigger.querySelector('span').textContent = select.selectedOptions[0]?.textContent ?? '';
-  trigger.disabled = select.disabled || !select.options.length;
-}
-
-export function initializeExercisePicker() {
-  const dialog = byId('picker-dialog');
-  const list = dialog.querySelector('.picker-list');
-  let trigger;
-  document.addEventListener('click', (event) => {
-    const open = event.target.closest('[data-select]');
-    if (open) {
-      trigger = open;
-      const select = byId(trigger.dataset.select);
-      list.replaceChildren(...[...select.options].map((option) => {
-        const button = element('button', 'picker-option', option.textContent);
-        button.type = 'button';
-        button.dataset.value = option.value;
-        if (option.selected) {
-          button.setAttribute('aria-current', 'true');
-          button.append(icon('check'));
-        }
-        return button;
-      }));
-      dialog.showModal();
-      list.querySelector('[aria-current]')?.focus();
-      return;
-    }
-    if (event.target.closest('[data-picker-close]')) dialog.close();
-    const option = event.target.closest('.picker-option');
-    if (!option) return;
-    const select = byId(trigger.dataset.select);
-    const changed = select.value !== option.dataset.value;
-    select.value = option.dataset.value;
-    updateExercisePicker(select);
-    dialog.close();
-    if (changed) select.dispatchEvent(new Event('change', { bubbles: true }));
-  });
 }
 
 export function showError(container, message = '', field) {
@@ -107,7 +65,7 @@ export function showError(container, message = '', field) {
   field.setAttribute('aria-invalid', 'true');
   const hint = field.getAttribute('aria-describedby');
   field.setAttribute('aria-describedby', hint ? `${hint} ${inlineId}` : inlineId);
-  (field.hidden ? document.querySelector(`[data-select="${field.id}"]`) : field).focus();
+  field.focus();
 }
 
 export function toast(message, success = true) {
